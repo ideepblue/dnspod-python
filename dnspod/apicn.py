@@ -9,14 +9,20 @@ import re
 
 
 class ApiCn:
-    def __init__(self, email, password, **kw):
-        self.base_url = "dnsapi.cn"
+    def __init__(self, **kw):
+        self.base_url = "api.dnspod.com"
         
-        self.params = dict(
-            login_email=email,
-            login_password=password,
-            format="json",
-        )
+        if 'user_token' in kw:
+            self.params = dict(
+                user_token=kw['user_token'],
+                format="json",
+            )
+        else:
+            self.params = dict(
+                login_email=kw['email'],
+                login_password=kw['password'],
+                format="json",
+            )
         self.params.update(kw)
         self.path = None
     
@@ -27,7 +33,7 @@ class ApiCn:
             name = re.sub(r'([A-Z])', r'.\1', self.__class__.__name__)
             self.path = "/" + name[1:]
         conn = httplib.HTTPSConnection(self.base_url)
-        headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/json", "User-Agent": "dnspod-python/0.01 (im@chuangbo.li; DNSPod.CN API v2.8)"}
+        headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/json", "User-Agent": "dnspod-python/0.02 (@ideepblue; DNSPod.COM API)"}
         conn.request("POST", self.path, urllib.urlencode(self.params), headers)
         
         response = conn.getresponse()
@@ -129,7 +135,6 @@ class RecordDdns(_DomainApiBase):
         kw.update(dict(
             record_id=record_id,
             sub_domain=sub_domain,
-            record_type=record_type,
             record_line=record_line,
         ))
         _DomainApiBase.__init__(self, **kw)
@@ -140,4 +145,7 @@ class RecordStatus(_RecordBase):
         _RecordBase.__init__(self, **kw)
 
 class RecordInfo(_RecordBase):
+    pass
+
+class Auth(ApiCn):
     pass
